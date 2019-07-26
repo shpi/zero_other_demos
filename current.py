@@ -13,10 +13,10 @@ avg = bus.read_byte(0x2A)
 mvdifference = ((5000 / 1024 ) *  (avg-2)) 
 
 
-print('Millivolts:' + mvdifference)
+print('Millivolts:' +(str)(mvdifference))
 
 current = mvdifference / 185
 
-print('Current:' + current)
+print('Current:' + (str)(current))
 
 
