@@ -24,16 +24,10 @@ except ImportError:
 
 os.system("sudo modprobe uinput")
 
-DAEMON = True
-
 CAPABILITIES = {
     e.EV_ABS : (
         (e.ABS_X, AbsInfo(value=0, min=0, max=800, fuzz=0, flat=0, resolution=1)),
         (e.ABS_Y, AbsInfo(value=0, min=0, max=480, fuzz=0, flat=0, resolution=1)),
-        (e.ABS_MT_SLOT, AbsInfo(value=0, min=0, max=1, fuzz=0, flat=0, resolution=0)),
-        (e.ABS_MT_TRACKING_ID, AbsInfo(value=0, min=0, max=65535, fuzz=0, flat=0, resolution=0)),
-        (e.ABS_MT_POSITION_X, AbsInfo(value=0, min=0, max=800, fuzz=0, flat=0, resolution=0)),
-        (e.ABS_MT_POSITION_Y, AbsInfo(value=0, min=0, max=480, fuzz=0, flat=0, resolution=0)),
     ),
     e.EV_KEY : [
         e.BTN_TOUCH, 
@@ -43,40 +37,41 @@ CAPABILITIES = {
 PIDFILE = "/var/run/touch.pid"
 
 
-if DAEMON:
-    try:
+try:
         pid = os.fork()
         if pid > 0:
             sys.exit(0)
 
-    except OSError, e:
+except OSError, e:
         print("Fork #1 failed: {} ({})".format(e.errno, e.strerror))
         sys.exit(1)
 
 
-    os.chdir("/")
-    os.setsid()
-    os.umask(0)
+os.chdir("/")
+os.setsid()
+os.umask(0)
 
-    try:
+try:
         pid = os.fork()
         if pid > 0:
             fpid = open(PIDFILE, 'w')
             fpid.write(str(pid))
             fpid.close()
             sys.exit(0)
-    except OSError, e:
+
+except OSError, e:
+
         print("Fork #2 failed: {} ({})".format(e.errno, e.strerror))
         sys.exit(1)
 
 
-    si = file("/dev/null", 'r')
-    so = file("/dev/null", 'a+', 0)
-    se = file("/dev/null", 'a+', 0)
+si = file("/dev/null", 'r')
+so = file("/dev/null", 'a+', 0)
+se = file("/dev/null", 'a+', 0)
 
-    os.dup2(si.fileno(), sys.stdin.fileno())
-    os.dup2(so.fileno(), sys.stdout.fileno())
-    os.dup2(se.fileno(), sys.stderr.fileno())
+os.dup2(si.fileno(), sys.stdin.fileno())
+os.dup2(so.fileno(), sys.stdout.fileno())
+os.dup2(se.fileno(), sys.stderr.fileno())
 
 try:
     ui = UInput(CAPABILITIES, name="Touchscreen", bustype=e.BUS_USB)
@@ -105,28 +100,19 @@ def touchint(channel):
   global start,stop
   start = 1
   stop = 1  
-      
-   
-
 
 gpio.add_event_detect(INT, gpio.RISING, callback=touchint, bouncetime=200)      #touch interrupt
 
 
 def write_status(x, y):
             global start
-            ui.write(e.EV_ABS, e.ABS_MT_SLOT, 0)
             ui.write(e.EV_ABS, e.ABS_X, x)
             ui.write(e.EV_ABS, e.ABS_Y, y)
-            ui.write(e.EV_ABS, e.ABS_MT_POSITION_X, x)
-            ui.write(e.EV_ABS, e.ABS_MT_POSITION_Y, y)
             if start:
-              ui.write(e.EV_ABS, e.ABS_MT_TRACKING_ID, 0)
               ui.write(e.EV_KEY, e.BTN_TOUCH, 1)
               start = 0
             ui.write(e.EV_SYN, e.SYN_REPORT, 0)
             ui.syn()
-            
-              
 
 def smbus_read_touch():
     
@@ -150,10 +136,9 @@ while True:
             smbus_read_touch()
         elif stop:
                  stop = 0                 
-                 ui.write(e.EV_ABS, e.ABS_MT_SLOT, 0)
-                 ui.write(e.EV_ABS, e.ABS_MT_TRACKING_ID, -1)
                  ui.write(e.EV_KEY, e.BTN_TOUCH, 0)
                  ui.write(e.EV_SYN, e.SYN_REPORT, 0)
                  ui.syn()
         time.sleep(0.02)
 ui.close()
+
