@@ -11,7 +11,7 @@ bus = smbus.SMBus(2)
 LINES = True # change this to see bar graph
 
 display = pi3d.Display.create(w=800, h=480, background=(0,0,0,1), frames_per_second=60)
-font = pi3d.Font("verdana.ttf")
+font = pi3d.Font("opensans.ttf")
 
 
 
