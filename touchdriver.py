@@ -90,14 +90,13 @@ gpio.setup(INT, gpio.IN)
 
 bus = smbus.SMBus(2)
 
-last_x1  = -1
-last_y1  = -1
+
 start = 0
-stop = 0
+
 
 
 def touchint(channel):
-  global start,stop
+  global start
   if gpio.input(channel):
      start = 1
   else:
@@ -110,7 +109,7 @@ gpio.add_event_detect(INT, gpio.BOTH, callback=touchint)      #touch interrupt
 
 
 def write_status(x, y):
-            global start, stop
+            global start
             ui.write(e.EV_ABS, e.ABS_X, x)
             ui.write(e.EV_ABS, e.ABS_Y, y)
             if start:
