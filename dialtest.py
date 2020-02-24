@@ -56,8 +56,8 @@ for x in range(-135,135):
    if x % 3 == 0:
     shape2.append((220* sin(radians(x)), 220* cos(radians(x)), 2))
    if x % 5 == 0:
-    shape.append((200* sin(radians(x)) , 200 * cos(radians(x)), 2))
-    shape.append((240* sin(radians(x)) , 240 * cos(radians(x)), 2))
+    shape.append((200* sin(radians(x)) , 200 * cos(radians(x)), 0.1))
+    shape.append((240* sin(radians(x)) , 240 * cos(radians(x)), 0.1))
 
 degree = 0
 
@@ -66,10 +66,17 @@ line.set_shader(MATSH)
 line.set_material((1, 1, 1))
 line.set_alpha(0.8)
 
+bline = pi3d.Lines(vertices=shape2[0:(degree+134)//3],camera=CAMERA, line_width=40, strip=True)
+bline.set_shader(MATSH)
+bline.set_material((0, 1, 0))
+bline.set_alpha(0.4)
+
+
 line2 = pi3d.Lines(vertices=shape2[(degree+134)//3:],camera=CAMERA, line_width=5, strip=True)
 line2.set_shader(MATSH)
 line2.set_material((1, 1, 1))
 line2.set_alpha(0.2)
+
 
 
 SHADER = pi3d.Shader("uv_flat")
@@ -114,8 +121,9 @@ while DISPLAY.loop_running():
      if degree > 135:  degree = 135
      if degree < -135: degree = -135
 
-     actval = (degree + 135) / 2.7
-     rgbval = round((degree + 135) / 270,2)
+     actval = (degree + 135) / 2.7  #in percent
+     tempval = (degree / 18) + 22.5 #in degree celsion 15 - 30°
+     rgbval = round((degree + 135) / 270,2) # rgbval 0.0 - 1.0
  
      line = pi3d.Lines(vertices=shape[0:((degree+138)*2)//5],camera=CAMERA, line_width=5, strip=False)
      line.set_shader(MATSH)
@@ -127,7 +135,13 @@ while DISPLAY.loop_running():
      line2.set_material((1, 1, 1))
      line2.set_alpha(0.2)
 
-     actval= pi3d.FixedString('opensans.ttf', str(int(actval))+'%', font_size=65,shadow_radius=0, 
+     bline = pi3d.Lines(vertices=shape2[0:(degree+134)//3],camera=CAMERA, line_width=40, strip=True)
+     bline.set_shader(MATSH)
+     bline.set_material((0, 1, 0))
+     bline.set_alpha(0.4)
+
+
+     actval= pi3d.FixedString('opensans.ttf', str(round(tempval,1))+'°', font_size=65,shadow_radius=0, 
                         background_color=(0,0,0,0), color= (255,255,255,255),
                         camera=CAMERA, shader=SHADER, f_type='SMOOTH')
      actval.sprite.position(0, 0, 1)
@@ -140,11 +154,11 @@ while DISPLAY.loop_running():
      dot2.set_shader(MATSH)
      dot2.set_material((rgbval, 0, 1-rgbval))
      dot2.set_alpha(1)
-
-
+     dot2.draw()
+     bline.draw()
  
  line.draw() 
- dot2.draw()
+ 
  line2.draw()
  #line3.draw()
  actval.draw()
