@@ -135,7 +135,7 @@ class Dial(object):
                     b.set_material(rgb)
 
 
-                for (line_shape, z_first, z_second, z_third, rgb) in [(self.sensorticks, -1.0, 1.0, -1.0, (1,1,1))]:
+                for (line_shape, z_first, z_second, z_third) in [(self.sensorticks, -1.0, 0.1, -1.0)]:
                     b = line_shape.buf[0]
                     v = b.array_buffer
                     sensordegree = (self.angle_fr +  (self.angle_to - self.angle_fr) * (self.sensorvalue - self.min_t)
@@ -154,12 +154,13 @@ class Dial(object):
                      v[:cut_n:,2] = z_first  # show points by moving away
                      v[cut_n:cut_s, 2] = z_second # hide points by moving behind near plane!
                      v[cut_s:, 2] = z_third # hide points by moving behind near plane!
+                     rgb = (0,0,1)
 
                     else:
                      v[:cut_s:,2] = z_first  # show points by moving away
                      v[cut_s:cut_n, 2] = z_second # hide points by moving behind near plane!
                      v[cut_n:, 2] = z_third # hide points by moving behind near plane!
-
+                     rgb = (1,0,0)
 
                     b.re_init()
                     b.set_material(rgb)
@@ -180,11 +181,14 @@ class Dial(object):
 
     def draw(self):
         if self.dot2_alpha > 0.0:
-            self.dot2_alpha -= 0.003
+            self.dot2_alpha -= 0.01
             self.dot2.set_alpha(self.dot2_alpha)
             self.dot2.draw()
+            if self.dot2_alpha < 0.0:
+              self.ticks.set_material((1,1,1))
+        else:
+            self.sensorticks.draw()
         self.ticks.draw()
-        self.sensorticks.draw()
         self.dial.draw()
         self.actval.draw()
 
