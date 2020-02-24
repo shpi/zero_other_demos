@@ -50,6 +50,11 @@ class Dial(object):
         self.ticks.set_material((1, 1, 1))
         self.ticks.set_alpha(0.8)
 
+        self.sensorticks = pi3d.Lines(vertices=tick_verts, camera=camera, line_width=8, strip=False)
+        self.sensorticks.set_shader(shader)
+        self.sensorticks.set_material((1, 1, 1))
+        self.sensorticks.set_alpha(1)
+
         self.bline = pi3d.Lines(vertices=solid_verts, camera=camera, line_width=40, strip=True)
         self.bline.set_shader(shader)
         self.bline.set_material((0, 1, 0))
@@ -74,6 +79,7 @@ class Dial(object):
         self.x1, self.y1 = -5, 10
         self.set_flag = True
         self.value = 20.0
+        self.sensorvalue = 18.0
 
     def touch(self):
         try:
@@ -128,6 +134,39 @@ class Dial(object):
                     b.re_init()
                     b.set_material(rgb)
 
+
+                for (line_shape, z_first, z_second, z_third, rgb) in [(self.sensorticks, -1.0, 1.0, -1.0, (1,1,1))]:
+                    b = line_shape.buf[0]
+                    v = b.array_buffer
+                    sensordegree = (self.angle_fr +  (self.angle_to - self.angle_fr) * (self.sensorvalue - self.min_t)
+                                                            / (self.max_t - self.min_t))
+                    cut_n = int((degree - self.angle_fr) / (self.angle_to - self.angle_fr) * len(v))
+                    cut_s = int((sensordegree - self.angle_fr) / (self.angle_to - self.angle_fr) * len(v))
+
+                    if cut_s >= len(v):
+                        cut_s = len(v) - 1
+
+                    if cut_n >= len(v):
+                        cut_n = len(v) - 1
+
+                    if sensordegree > degree:
+
+                     v[:cut_n:,2] = z_first  # show points by moving away
+                     v[cut_n:cut_s, 2] = z_second # hide points by moving behind near plane!
+                     v[cut_s:, 2] = z_third # hide points by moving behind near plane!
+
+                    else:
+                     v[:cut_s:,2] = z_first  # show points by moving away
+                     v[cut_s:cut_n, 2] = z_second # hide points by moving behind near plane!
+                     v[cut_n:, 2] = z_third # hide points by moving behind near plane!
+
+
+                    b.re_init()
+                    b.set_material(rgb)
+
+
+
+
                 self.temp_block.set_text(text_format="{:4.1f}°".format(self.value))
                 self.actval.regen()
 
@@ -145,6 +184,7 @@ class Dial(object):
             self.dot2.set_alpha(self.dot2_alpha)
             self.dot2.draw()
         self.ticks.draw()
+        self.sensorticks.draw()
         self.dial.draw()
         self.actval.draw()
 
