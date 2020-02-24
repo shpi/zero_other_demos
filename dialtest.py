@@ -1,9 +1,8 @@
-
-from __future__ import absolute_import, division, print_function, unicode_literals
-from math import sin, cos,radians,atan,degrees
-import pi3d
-import RPi.GPIO as gpio
-import i2c
+from __future__ import absolute_import, division, print_function, unicode_literals 
+from math import sin, cos,radians,atan,degrees 
+import pi3d 
+import RPi.GPIO as gpio 
+import i2c 
 import time
 
 gpio.setmode(gpio.BCM)
@@ -32,6 +31,7 @@ def touch():
                 if y1 == 0:
                     y1 = 1
                 if ((-401 < x1 < 401) & (-241 < y1 < 241)):
+                        print(x1,y1)
                         return x1, y1  # compensate position to match with PI3D
                 else:
                         time.sleep(0.01)
@@ -97,14 +97,46 @@ while DISPLAY.loop_running():
 
  line3 = pi3d.Lines(vertices=[(0,0,2),(x2,y2,2)], line_width=2, strip=True)
  degree = degrees(atan(x2/y2))
+
  if y2 < 0:
   degree += 180
+
+ if y2 < 0 and x2 < 0:
+  degree -= 360
+
+ degree = int(degree)
+ shape2 = []
+ shape = []
+ for x in range(degree,135):
+
+    shape2.append((200* sin(radians(x)), 200* cos(radians(x)),2 ))
+
+ for x in range(-135,degree):
+   if x % 10 == 0:
+    shape.append((170* sin(radians(x)) , 170 * cos(radians(x)), 2))
+    shape.append((230* sin(radians(x)) , 230 * cos(radians(x)), 2))
+
+
+ line = pi3d.Lines(vertices=shape,camera=CAMERA, line_width=10, strip=False)
+ line.set_shader(MATSH)
+ line.set_material((1, 1, 1))
+ line.set_alpha(0.8)
+
+ line2 = pi3d.Lines(vertices=shape2,camera=CAMERA, line_width=35, strip=True)
+ line2.set_shader(MATSH)
+ line2.set_material((1, 1, 1))
+ line2.set_alpha(0.2)
+
+
+
 
 
  actval= pi3d.FixedString('opensans.ttf', str(int(degree)), font_size=65,shadow_radius=0, 
                         background_color=(0,0,0,0), color= (255,255,255,255),
                         camera=CAMERA, shader=SHADER, f_type='SMOOTH')
  actval.sprite.position(0, 0, 1)
+
+
 
 
 
