@@ -105,13 +105,19 @@ while DISPLAY.loop_running():
   degree -= 360
 
  degree = int(degree)
- shape2 = []
- shape = []
- for x in range(degree,135):
+ if degree > 135:  degree = 135
+ if degree < -135: degree = -135
+
+ actval = (degree + 135) / 2.7
+ rgbval = round((degree + 135) / 270,2)
+ if degree < 135:
+  shape2 =[]
+  for x in range(degree,135):
 
     shape2.append((200* sin(radians(x)), 200* cos(radians(x)),2 ))
-
- for x in range(-135,degree):
+ if degree > -125:
+  shape = []
+  for x in range(-135,degree):
    if x % 10 == 0:
     shape.append((170* sin(radians(x)) , 170 * cos(radians(x)), 2))
     shape.append((230* sin(radians(x)) , 230 * cos(radians(x)), 2))
@@ -119,7 +125,7 @@ while DISPLAY.loop_running():
 
  line = pi3d.Lines(vertices=shape,camera=CAMERA, line_width=10, strip=False)
  line.set_shader(MATSH)
- line.set_material((1, 1, 1))
+ line.set_material((rgbval, 0, 1-rgbval))
  line.set_alpha(0.8)
 
  line2 = pi3d.Lines(vertices=shape2,camera=CAMERA, line_width=35, strip=True)
@@ -131,7 +137,7 @@ while DISPLAY.loop_running():
 
 
 
- actval= pi3d.FixedString('opensans.ttf', str(int(degree)), font_size=65,shadow_radius=0, 
+ actval= pi3d.FixedString('opensans.ttf', str(int(actval))+'%', font_size=65,shadow_radius=0, 
                         background_color=(0,0,0,0), color= (255,255,255,255),
                         camera=CAMERA, shader=SHADER, f_type='SMOOTH')
  actval.sprite.position(0, 0, 1)
